@@ -48,10 +48,7 @@ export default async function handler(
       [user.rows[0].id, token]
     );
 
-
-
     res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Path=/`);
-    
 
     res.status(201).end();
   } catch (error) {
@@ -59,4 +56,3 @@ export default async function handler(
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-

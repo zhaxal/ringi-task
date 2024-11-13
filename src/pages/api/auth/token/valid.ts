@@ -43,7 +43,16 @@ export default async function handler(
       [user_id]
     );
 
-    res.status(200).json({ user_id });
+    const role_id = await pool.query(
+      "SELECT role_id FROM user_roles WHERE user_id = $1",
+      [user_id]
+    );
+
+    const role = await pool.query("SELECT name FROM roles WHERE id = $1", [
+      role_id.rows[0].role_id,
+    ]);
+
+    res.status(200).json({ user_id, role_id, role });
   } catch (error) {
     console.error("Token validation error:", error);
     return res.status(500).json({ error: "Internal server error" });

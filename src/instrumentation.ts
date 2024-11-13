@@ -1,6 +1,4 @@
 
-// export const runtime = "nodejs";
-
 // let isRegistered = false;
 
 // export async function register() {

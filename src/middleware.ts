@@ -12,6 +12,11 @@ export async function middleware(request: NextRequest) {
       if (isApi) {
         return NextResponse.json({ error: "Missing token" }, { status: 401 });
       }
+
+      if (!isAuthPage) {
+        return NextResponse.redirect(`${baseUrl}/auth/login`);
+      }
+
       return NextResponse.next();
     }
 
@@ -27,6 +32,10 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
+      if (!isAuthPage) {
+        return NextResponse.redirect(`${baseUrl}/auth/login`);
+      }
+
       return NextResponse.next();
     }
 
@@ -34,11 +43,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/dashboard`);
     }
 
-    const { user_id } = await res.json();
+    const { user_id, role, role_id } = await res.json();
 
     const response = NextResponse.next();
     if (isApi) {
       response.headers.set("x-user-id", user_id);
+      response.headers.set("x-role", role);
+      response.headers.set("x-role-id", role_id);
     }
     return response;
   } catch (error) {
@@ -51,5 +62,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/user/:path*", "/auth/:path*", "/dashboard"],
+  matcher: [
+    "/api/user/:path*",
+    "/auth/:path*",
+    "/dashboard",
+    "/api/orders",
+    "/api/products",
+  ],
 };
