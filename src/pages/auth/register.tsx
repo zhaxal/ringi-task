@@ -1,6 +1,7 @@
 
 
 import RegisterForm from "@/components/register-page-components/RegisterForm";
+import Link from "next/link";
 
 export default function RegisterPage() {
   return (
@@ -14,6 +15,12 @@ export default function RegisterPage() {
 
         <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <RegisterForm />
+        </div>
+
+        <div className="text-center text-sm">
+          <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+            Already have an account? Sign in
+          </Link>
         </div>
       </div>
     </div>

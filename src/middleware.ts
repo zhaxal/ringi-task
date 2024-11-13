@@ -3,8 +3,9 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   try {
-    const token = request.headers.get("authorization")?.replace("Bearer ", "");
+    const token = request.cookies.get("token")?.value;
     const isApi = request.nextUrl.pathname.startsWith("/api");
+    const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
     const baseUrl = request.nextUrl.origin;
 
     if (!token) {
@@ -14,7 +15,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Validate token
     const res = await fetch(`${baseUrl}/api/auth/token/valid`, {
       method: "GET",
       headers: {
@@ -22,7 +22,6 @@ export async function middleware(request: NextRequest) {
       },
     });
 
-    // Handle token validation results
     if (!res.ok) {
       if (isApi) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,7 +30,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Handle authenticated users
+    if (isAuthPage) {
+      return NextResponse.redirect(`${baseUrl}/dashboard`);
+    }
+
     const { user_id } = await res.json();
 
     const response = NextResponse.next();
@@ -39,18 +41,15 @@ export async function middleware(request: NextRequest) {
       response.headers.set("x-user-id", user_id);
     }
     return response;
-
   } catch (error) {
     console.error("Middleware error:", error);
     return NextResponse.json(
-      { error: "Internal server error" }, 
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
 }
 
 export const config = {
-  matcher: [
-    '/api/user/:path*'
-  ]
+  matcher: ["/api/user/:path*", "/auth/:path*", "/dashboard"],
 };

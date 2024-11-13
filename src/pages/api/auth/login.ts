@@ -48,7 +48,12 @@ export default async function handler(
       [user.rows[0].id, token]
     );
 
-    res.status(200).json({ token });
+
+
+    res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Path=/`);
+    
+
+    res.status(201).end();
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({ error: "Internal server error" });

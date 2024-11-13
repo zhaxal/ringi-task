@@ -60,7 +60,9 @@ export default async function handler(
       token,
     ]);
 
-    return res.status(200).json({ token });
+    res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Path=/`);
+
+    return res.status(201).end();
   } catch (error) {
     console.error("Registration error:", error);
     return res.status(500).json({ error: "Internal server error" });

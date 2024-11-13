@@ -32,10 +32,6 @@ export default function LoginForm() {
         throw new Error(message);
       }
 
-      const {token} = await response.json();
-
-      localStorage.setItem("token", token);
-
       router.push("/dashboard");
     } catch (error) {
       setError((error as Error).message);
