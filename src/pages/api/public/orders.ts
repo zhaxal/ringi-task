@@ -71,6 +71,31 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
               const productPrice = priceResult.rows[0].price;
               orderPrice += productPrice * product.quantity;
+
+              const quantity = product.quantity;
+
+              const stockQuery = `
+                SELECT stock FROM products
+                WHERE id = $1
+              `;
+
+              const stockResult = await client.query(stockQuery, [product.id]);
+              const finalQuantity = stockResult.rows[0].stock - quantity;
+              if (finalQuantity < 0) {
+                throw new Error(`Not enough stock for product ${product.id}`);
+              }
+
+              const updateStockQuery = `
+                UPDATE products
+                SET stock = $1
+                WHERE id = $2
+              `;
+
+              await client.query(updateStockQuery, [finalQuantity, product.id]);
+
+              if (finalQuantity < 5) {
+                console.warn(`Product ${product.id} is running low on stock`);
+              }
             }
 
             const orderResult = await client.query(orderQuery, [
