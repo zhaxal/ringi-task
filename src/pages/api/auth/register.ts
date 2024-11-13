@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import pool from "@/database";
 
 import { v4 as uuidv4 } from "uuid";
-import bcrypt from "bcryptjs";
+import { genSaltSync, hashSync } from "bcrypt-ts";
 
 export default async function handler(
   req: NextApiRequest,
@@ -23,13 +23,13 @@ export default async function handler(
 
     if (typeof login !== "string" || login.length < 3) {
       return res.status(400).json({
-        error: "Login must be a string with at least 3 characters"
+        error: "Login must be a string with at least 3 characters",
       });
     }
 
     if (typeof password !== "string" || password.length < 6) {
       return res.status(400).json({
-        error: "Password must be a string with at least 6 characters"
+        error: "Password must be a string with at least 6 characters",
       });
     }
 
@@ -42,9 +42,11 @@ export default async function handler(
       return res.status(400).json({ error: "User already exists" });
     }
 
+    const salt = genSaltSync(10);
+
     const newUser = await pool.query(
       "INSERT INTO users (login, password) VALUES ($1, $2) RETURNING id",
-      [login, bcrypt.hashSync(password, 8)]
+      [login, hashSync(password, salt)]
     );
 
     await pool.query(
@@ -53,14 +55,14 @@ export default async function handler(
     );
 
     const token = uuidv4();
-    await pool.query(
-      "INSERT INTO sessions (user_id, token) VALUES ($1, $2)",
-      [newUser.rows[0].id, token]
-    );
+    await pool.query("INSERT INTO sessions (user_id, token) VALUES ($1, $2)", [
+      newUser.rows[0].id,
+      token,
+    ]);
 
     return res.status(200).json({ token });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import pool from "@/database";
-import bcrypt from "bcryptjs";
+import { compareSync } from "bcrypt-ts";
 import { v4 as uuidv4 } from "uuid";
 
 export default async function handler(
@@ -28,7 +28,7 @@ export default async function handler(
 
     if (
       user.rows.length === 0 ||
-      !bcrypt.compareSync(password, user.rows[0].password)
+      !compareSync(password, user.rows[0].password)
     ) {
       res.status(401).send("Invalid login or password");
       return;

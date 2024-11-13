@@ -1,9 +1,8 @@
 import pool from "@/database";
 
-async function initDatabase() {
-  const client = await pool.connect();
-  try {
-    await client.query(`
+const client = await pool.connect();
+try {
+  await client.query(`
       CREATE TABLE IF NOT EXISTS roles (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) UNIQUE NOT NULL,
@@ -12,13 +11,13 @@ async function initDatabase() {
       );
     `);
 
-    await client.query(`
+  await client.query(`
       INSERT INTO roles (name) 
       VALUES ('customer'), ('seller')
       ON CONFLICT (name) DO NOTHING;
     `);
 
-    await client.query(`
+  await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         login VARCHAR(255) UNIQUE NOT NULL,
@@ -28,7 +27,7 @@ async function initDatabase() {
       );
     `);
 
-    await client.query(`
+  await client.query(`
       CREATE TABLE IF NOT EXISTS user_roles (
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
@@ -36,7 +35,7 @@ async function initDatabase() {
       );
     `);
 
-    await client.query(`
+  await client.query(`
       CREATE TABLE IF NOT EXISTS sessions (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
@@ -45,12 +44,9 @@ async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-  } catch (error) {
-    console.error("Failed to initialize database:", error);
-    throw error;
-  } finally {
-    client.release();
-  }
+} catch (error) {
+  console.error("Failed to initialize database:", error);
+  throw error;
+} finally {
+  client.release();
 }
-
-export default initDatabase;

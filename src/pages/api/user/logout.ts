@@ -1,9 +1,8 @@
-import type { NextApiResponse } from "next";
-import { withAuth, AuthenticatedRequest } from "@/utils/withAuth";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 import pool from "@/database";
 
-async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "DELETE") {
     res.setHeader("Allow", ["DELETE"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
@@ -11,7 +10,11 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   }
 
   try {
-    const userId = req.user.id;
+    const userId = req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(400).json({ error: "Missing user ID" });
+    }
 
     await pool.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
 
@@ -22,4 +25,4 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse) {
   }
 }
 
-export default withAuth(handler);
+export default handler;
