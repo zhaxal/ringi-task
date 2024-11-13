@@ -4,18 +4,17 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
   try {
     const token = request.headers.get("authorization")?.replace("Bearer ", "");
-
     const isApi = request.nextUrl.pathname.startsWith("/api");
-    const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
-
-    if (isApi && !token)
-      return NextResponse.json({ error: "Missing token" }, { status: 400 });
-
-    if (!isApi && !token)
-      return NextResponse.redirect(new URL("/", request.url));
-
     const baseUrl = request.nextUrl.origin;
 
+    if (!token) {
+      if (isApi) {
+        return NextResponse.json({ error: "Missing token" }, { status: 401 });
+      }
+      return NextResponse.next();
+    }
+
+    // Validate token
     const res = await fetch(`${baseUrl}/api/auth/token/valid`, {
       method: "GET",
       headers: {
@@ -23,30 +22,35 @@ export async function middleware(request: NextRequest) {
       },
     });
 
-    if (isAuthPage && res.ok)
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    // Handle token validation results
+    if (!res.ok) {
+      if (isApi) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
 
-    if (isAuthPage && !res.ok) return NextResponse.next();
+      return NextResponse.next();
+    }
 
-    if (isApi && !res.ok)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    if (!isApi && !res.ok)
-      return NextResponse.redirect(new URL("/", request.url));
-
+    // Handle authenticated users
     const { user_id } = await res.json();
+
     const response = NextResponse.next();
-
-    if (isApi) response.headers.set("x-user-id", user_id);
-
+    if (isApi) {
+      response.headers.set("x-user-id", user_id);
+    }
     return response;
+
   } catch (error) {
     console.error("Middleware error:", error);
-    return NextResponse.error();
+    return NextResponse.json(
+      { error: "Internal server error" }, 
+      { status: 500 }
+    );
   }
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/api/user/:path*", "/auth/:path*"],
+  matcher: [
+    '/api/user/:path*'
+  ]
 };

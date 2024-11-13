@@ -1,13 +1,10 @@
 "use client";
 
-import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 
-export default function LoginForm() {
+export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,7 +16,7 @@ export default function LoginForm() {
       const login = form.login.value;
       const password = form.password.value;
 
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -31,12 +28,6 @@ export default function LoginForm() {
         const message = await response.text();
         throw new Error(message);
       }
-
-      const {token} = await response.json();
-
-      localStorage.setItem("token", token);
-
-      router.push("/dashboard");
     } catch (error) {
       setError((error as Error).message);
       console.error(error);
@@ -66,9 +57,7 @@ export default function LoginForm() {
           placeholder="Enter your login"
           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
-      </div>
 
-      <div className="space-y-1">
         <label htmlFor="password" className="text-sm font-medium">
           Password
         </label>
@@ -81,15 +70,15 @@ export default function LoginForm() {
           placeholder="Enter your password"
           className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
-      </div>
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full p-2 bg-blue-500 text-white font-medium rounded"
-      >
-        {isLoading ? "Loading..." : "Sign in"}
-      </button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full p-2 bg-blue-500 text-white font-semibold rounded"
+        >
+          {isLoading ? "Loading..." : "Sign up"}
+        </button>
+      </div>
     </form>
   );
 }

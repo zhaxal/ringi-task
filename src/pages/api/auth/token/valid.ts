@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-
 import pool from "@/database";
 
 export default async function handler(
@@ -20,7 +19,7 @@ export default async function handler(
     }
 
     const session = await pool.query(
-      "SELECT user_id FROM sessions WHERE token = $1",
+      "SELECT user_id, updated_at FROM sessions WHERE token = $1",
       [token]
     );
 
@@ -29,6 +28,13 @@ export default async function handler(
     }
 
     const user_id = session.rows[0].user_id;
+    const updatedAt = new Date(session.rows[0].updated_at);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    if (updatedAt < twentyFourHoursAgo) {
+      await pool.query("DELETE FROM sessions WHERE token = $1", [token]);
+      return res.status(401).json({ error: "Token expired" });
+    }
 
     await pool.query(
       `UPDATE sessions 

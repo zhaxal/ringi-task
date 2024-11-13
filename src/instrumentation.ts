@@ -1,12 +1,19 @@
-// instrumentation.ts
-export const runtime = "nodejs";
 
-export async function register() {
-  try {
-    await import("./utils/initDB");
+// export const runtime = "nodejs";
 
-    console.log(" ✓ Database initialized");
-  } catch (error) {
-    console.error(" ⨯ Failed to initialize database:", error);
-  }
-}
+// let isRegistered = false;
+
+// export async function register() {
+//   if (isRegistered) {
+//     return;
+//   }
+
+//   try {
+//     await import("./utils/initDB");
+
+//     console.log(" ✓ Database initialized");
+//     isRegistered = true;
+//   } catch (error) {
+//     console.error(" ⨯ Failed to initialize database:", error);
+//   }
+// }

@@ -37,10 +37,14 @@ export default async function handler(
     const token = uuidv4();
 
     await pool.query(
-      `UPDATE sessions 
-       SET token = $2, 
-           updated_at = CURRENT_TIMESTAMP 
+      `DELETE FROM sessions 
        WHERE user_id = $1`,
+      [user.rows[0].id]
+    );
+
+    await pool.query(
+      `INSERT INTO sessions (user_id, token) 
+       VALUES ($1, $2)`,
       [user.rows[0].id, token]
     );
 
@@ -50,3 +54,4 @@ export default async function handler(
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
