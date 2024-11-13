@@ -6,6 +6,7 @@ export async function middleware(request: NextRequest) {
     const token = request.headers.get("authorization")?.replace("Bearer ", "");
 
     const isApi = request.nextUrl.pathname.startsWith("/api");
+    const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
 
     if (isApi && !token)
       return NextResponse.json({ error: "Missing token" }, { status: 400 });
@@ -21,6 +22,11 @@ export async function middleware(request: NextRequest) {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    if (isAuthPage && res.ok)
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+
+    if (isAuthPage && !res.ok) return NextResponse.next();
 
     if (isApi && !res.ok)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,5 +48,5 @@ export async function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/api/user/:path*"],
+  matcher: ["/api/user/:path*", "/auth/:path*"],
 };
