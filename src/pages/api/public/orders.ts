@@ -1,6 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import pool from "@/database";
 
+class OrderError extends Error {
+  constructor(message: string, public statusCode: number) {
+    super(message);
+    this.name = "OrderError";
+  }
+}
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method, body } = req;
 
@@ -45,97 +52,112 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           }
 
           const client = await pool.connect();
-
           let orderPrice = 0;
-          let orderId;
+          let orderId = 0;
 
           try {
             await client.query("BEGIN");
 
-            const orderQuery = `
-              INSERT INTO orders (customer_name, customer_email, customer_phone, status, total_price)
-              VALUES ($1, $2, $3, 'pending', $4)
-              RETURNING id
-            `;
+            const productValidations = await Promise.all(
+              products.map(async (product) => {
+                const result = await client.query(
+                  `SELECT id, price, stock FROM products WHERE id = $1 FOR UPDATE`,
+                  [product.id]
+                );
 
-            for (const product of products) {
-              const priceQuery = `
-                SELECT price FROM products 
-                WHERE id = $1
-              `;
-              const priceResult = await client.query(priceQuery, [product.id]);
+                if (result.rows.length === 0) {
+                  throw new OrderError(`Product ${product.id} not found`, 404);
+                }
 
-              if (priceResult.rows.length === 0) {
-                throw new Error(`Product ${product.id} not found`);
-              }
+                const { price, stock } = result.rows[0];
+                if (stock < product.quantity) {
+                  throw new OrderError(
+                    `Insufficient stock for product ${product.id}: requested ${product.quantity}, available ${stock}`,
+                    400
+                  );
+                }
 
-              const productPrice = priceResult.rows[0].price;
-              orderPrice += productPrice * product.quantity;
+                return {
+                  id: product.id,
+                  price,
+                  requestedQuantity: product.quantity,
+                  currentStock: stock,
+                };
+              })
+            );
 
-              const quantity = product.quantity;
+            // Calculate total price and update stock
+            for (const validation of productValidations) {
+              orderPrice += validation.price * validation.requestedQuantity;
 
-              const stockQuery = `
-                SELECT stock FROM products
-                WHERE id = $1
-              `;
-
-              const stockResult = await client.query(stockQuery, [product.id]);
-              const finalQuantity = stockResult.rows[0].stock - quantity;
-              if (finalQuantity < 0) {
-                throw new Error(`Not enough stock for product ${product.id}`);
-              }
-
-              const updateStockQuery = `
-                UPDATE products
-                SET stock = $1
-                WHERE id = $2
-              `;
-
-              await client.query(updateStockQuery, [finalQuantity, product.id]);
+              const finalQuantity =
+                validation.currentStock - validation.requestedQuantity;
+              await client.query(
+                `UPDATE products SET stock = $1 WHERE id = $2`,
+                [finalQuantity, validation.id]
+              );
 
               if (finalQuantity < 5) {
-                console.warn(`Product ${product.id} is running low on stock`);
+                console.warn(
+                  `Low stock alert: Product ${validation.id} has ${finalQuantity} units remaining`
+                );
               }
             }
 
-            const orderResult = await client.query(orderQuery, [
-              customerName,
-              customerEmail,
-              customerPhone,
-              orderPrice,
-            ]);
+            // Create order
+            const orderResult = await client.query(
+              `INSERT INTO orders (
+                customer_name, customer_email, customer_phone, 
+                status, total_price
+              ) VALUES ($1, $2, $3, 'pending', $4)
+              RETURNING id`,
+              [customerName, customerEmail, customerPhone, orderPrice]
+            );
+
             orderId = orderResult.rows[0].id;
 
-            for (const product of products) {
-              const orderItemQuery = `
-                INSERT INTO order_items (order_id, product_id, quantity)
-                VALUES ($1, $2, $3)
-              `;
-              await client.query(orderItemQuery, [
-                orderId,
-                product.id,
-                product.quantity,
-              ]);
-            }
+            // Create order items
+            await Promise.all(
+              products.map((product) =>
+                client.query(
+                  `INSERT INTO order_items (order_id, product_id, quantity)
+                   VALUES ($1, $2, $3)`,
+                  [orderId, product.id, product.quantity]
+                )
+              )
+            );
 
             await client.query("COMMIT");
+
+            res.status(200).json({
+              message: "Order created successfully",
+              order: {
+                id: orderId,
+                total_price: orderPrice,
+                items: products.map((p) => ({
+                  product_id: p.id,
+                  quantity: p.quantity,
+                })),
+              },
+            });
           } catch (error) {
             await client.query("ROLLBACK");
+
+            if (error instanceof OrderError) {
+              return res.status(error.statusCode).json({
+                message: error.message,
+              });
+            }
             throw error;
           } finally {
             client.release();
           }
-
-          res.status(201).json({
-            message: "Order created successfully",
-            order: {
-              id: orderId,
-              total_price: orderPrice,
-            },
-          });
         } catch (error) {
           console.error("Create order error:", error);
-          res.status(500).json({ message: "Internal Server Error" });
+          res.status(500).json({
+            message:
+              error instanceof Error ? error.message : "Internal Server Error",
+          });
         }
       }
 

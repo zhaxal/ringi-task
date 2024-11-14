@@ -8,7 +8,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <div className="flex flex-col h-full">
       <Navbar />
-      <div className="flex-grow mx-12">
+      <div className="flex-grow mx-4 md:mx-8 lg:mx-16">
         <Component {...pageProps} />
       </div>
       <Footer />

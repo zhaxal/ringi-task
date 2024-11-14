@@ -70,14 +70,14 @@ try {
       );
     `);
 
-  await client.query(`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS order_items (
         order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
-        product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+        product_id INTEGER REFERENCES products(id) ON DELETE RESTRICT,
         quantity INTEGER NOT NULL,
         PRIMARY KEY (order_id, product_id)
       );
-    `);
+    `);    
 } catch (error) {
   console.error("Failed to initialize database:", error);
   throw error;
