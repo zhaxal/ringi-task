@@ -102,7 +102,7 @@ export default function Order() {
       }
 
       localStorage.removeItem("cart");
-      router.push("/prodcuts/success");
+      router.push("/products/success");
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to create order"

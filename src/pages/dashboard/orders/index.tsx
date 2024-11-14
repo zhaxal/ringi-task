@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 
 interface Order {
@@ -17,7 +16,7 @@ interface OrderResponse {
     page: number;
     limit: number;
     totalItems: number;
-    totalPage: number;
+    totalPages: number;
     hasMore: boolean;
   };
 }
@@ -192,7 +191,9 @@ export default function Orders() {
               <p className="text-sm text-gray-700">
                 Showing page <span className="font-medium">{currentPage}</span>{" "}
                 of{" "}
-                <span className="font-medium">{data.pagination.totalPage}</span>
+                <span className="font-medium">
+                  {data.pagination.totalPages}
+                </span>
               </p>
             </div>
             <div>

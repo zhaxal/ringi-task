@@ -1,10 +1,67 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import pool from "@/database";
+import { Auth } from "googleapis";
 
 class OrderError extends Error {
   constructor(message: string, public statusCode: number) {
     super(message);
     this.name = "OrderError";
+  }
+}
+
+async function sendOrderNotifications(orderId: number, orderPrice: number) {
+  try {
+    const sellerTokensResult = await pool.query(`
+      SELECT DISTINCT uf.fcm_token 
+      FROM users u
+      JOIN user_roles ur ON u.id = ur.user_id
+      JOIN roles r ON r.id = ur.role_id
+      JOIN user_fcm uf ON u.id = uf.user_id
+      WHERE r.name = 'seller'
+      AND uf.fcm_token IS NOT NULL
+    `);
+
+    const sellerTokens = sellerTokensResult.rows.map((row) => row.fcm_token);
+
+    const credential = JSON.parse(
+      Buffer.from(process.env?.FIREBASE_SERVER_KEY ?? "", "base64").toString()
+    );
+
+    const jwtClient = new Auth.JWT(
+      credential.client_email,
+      undefined,
+      credential.private_key,
+      ["https://www.googleapis.com/auth/firebase.messaging"],
+      undefined
+    );
+
+    const oauthToken = await jwtClient.authorize();
+
+    await Promise.allSettled(
+      sellerTokens.map((token) =>
+        fetch(
+          `https://fcm.googleapis.com/v1/projects/${process.env.FIREBASE_PROJECT_ID}/messages:send`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${oauthToken.access_token}`,
+            },
+            body: JSON.stringify({
+              message: {
+                token,
+                notification: {
+                  title: "New order received",
+                  body: `Order #${orderId} for $${orderPrice.toFixed(2)}`,
+                },
+              },
+            }),
+          }
+        )
+      )
+    );
+  } catch (error) {
+    console.error("Notification error:", error);
   }
 }
 
@@ -116,7 +173,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
             orderId = orderResult.rows[0].id;
 
-            // Create order items
             await Promise.all(
               products.map((product) =>
                 client.query(
@@ -140,6 +196,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 })),
               },
             });
+
+            sendOrderNotifications(orderId, orderPrice).catch(console.error);
           } catch (error) {
             await client.query("ROLLBACK");
 

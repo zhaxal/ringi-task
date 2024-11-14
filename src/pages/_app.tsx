@@ -5,10 +5,25 @@ import { useState, useEffect } from "react";
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import useFCM from "@/utils/hooks/useFCM";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [isDashboard, setIsDashboard] = useState(false);
+
+  const { fcmToken } = useFCM();
+
+  useEffect(() => {
+    if (fcmToken) {
+      fetch("/api/user/notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fcm_token: fcmToken }),
+      });
+    }
+  }, [fcmToken]);
 
   useEffect(() => {
     setIsDashboard(router.pathname.startsWith("/dashboard"));
