@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 interface Order {
   id: number;
@@ -26,6 +27,7 @@ export default function Orders() {
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true);
@@ -126,9 +128,15 @@ export default function Orders() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {data.orders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
+              <tr
+                onClick={() => {
+                  router.push(`/dashboard/orders/${order.id}`);
+                }}
+                key={order.id}
+                className="hover:bg-gray-50"
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  #{order.id.toString().padStart(6, '0')}
+                  #{order.id.toString().padStart(6, "0")}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
@@ -136,11 +144,19 @@ export default function Orders() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{order.customer_email}</div>
-                  <div className="text-sm text-gray-500">{order.customer_phone}</div>
+                  <div className="text-sm text-gray-900">
+                    {order.customer_email}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {order.customer_phone}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                  <span
+                    className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                      order.status
+                    )}`}
+                  >
                     {order.status}
                   </span>
                 </td>
@@ -174,7 +190,8 @@ export default function Orders() {
           <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-gray-700">
-                Showing page <span className="font-medium">{currentPage}</span> of{' '}
+                Showing page <span className="font-medium">{currentPage}</span>{" "}
+                of{" "}
                 <span className="font-medium">{data.pagination.totalPage}</span>
               </p>
             </div>

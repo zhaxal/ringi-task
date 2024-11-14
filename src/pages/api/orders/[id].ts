@@ -44,8 +44,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             customer_phone,
             status,
             total_price,
-            created_at,
-            updated_at,
             items
           FROM order_details;
           `,
