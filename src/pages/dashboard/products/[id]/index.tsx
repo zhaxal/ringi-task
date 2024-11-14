@@ -57,6 +57,7 @@ export default function SellerProductDetails() {
         try {
           errorData = await response.json();
         } catch (parseError) {
+          console.error("Failed to parse error response:", parseError);
           throw new Error("Failed to parse error response");
         }
 

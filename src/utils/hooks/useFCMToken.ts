@@ -15,7 +15,8 @@ const useFCMToken = () => {
           const isFCMSupported = await isSupported();
           if (!isFCMSupported) return;
           const fcmToken = await getToken(messaging(), {
-            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+            vapidKey:
+              "BBxC8a-iNiet5y_2ikGJrdYUcm_8qd_GtMdQJVp3c5c__SHWSbEGARzmN9YW7BEl6YbnNCUPGZFMKuL35AN9zCs",
           });
           setFcmToken(fcmToken);
         }

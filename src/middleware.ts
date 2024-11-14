@@ -6,7 +6,10 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get("token")?.value;
     const isApi = request.nextUrl.pathname.startsWith("/api");
     const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
-    const baseUrl = request.nextUrl.origin;
+    const baseUrl =
+      process.env.NODE_ENV === "production"
+        ? process.env.BASE_URL
+        : request.nextUrl.origin;
 
     if (!token) {
       if (isApi) {

@@ -48,7 +48,12 @@ export default async function handler(
       [user.rows[0].id, token]
     );
 
-    res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Path=/`);
+    const isSecure = process.env.NODE_ENV === "production";
+    const cookieOptions = `HttpOnly; Path=/; ${
+      isSecure ? "Secure; SameSite=Strict" : ""
+    }`;
+
+    res.setHeader("Set-Cookie", `token=${token}; ${cookieOptions}`);
 
     res.status(201).end();
   } catch (error) {

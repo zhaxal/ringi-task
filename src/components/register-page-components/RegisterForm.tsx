@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/router";
 import { FormEvent, useState } from "react";
 
 export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,6 +30,8 @@ export default function RegisterForm() {
         const message = await response.text();
         throw new Error(message);
       }
+
+      router.push("/dashboard");
     } catch (error) {
       setError((error as Error).message);
       console.error(error);

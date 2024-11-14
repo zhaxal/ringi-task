@@ -1,6 +1,21 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Dashboard() {
+  const router = useRouter();
+
+  const logout = async () => {
+    try {
+      await fetch("/api/user/logout", {
+        method: "DELETE",
+      });
+
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center p-4 h-full">
       <div className="max-w-2xl w-full text-center">
@@ -26,6 +41,14 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Orders</h2>
             <p className="text-gray-600">View and manage customer orders</p>
           </Link>
+
+          <button
+            onClick={logout}
+            className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-sm border hover:border-red-500 transition-colors"
+          >
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Logout</h2>
+            <p className="text-gray-600">Sign out of your account</p>
+          </button>
         </div>
       </div>
     </div>

@@ -18,7 +18,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     await pool.query("DELETE FROM sessions WHERE user_id = $1", [userId]);
 
-    return res.status(201).end();
+    await pool.query("DELETE FROM user_fcm WHERE user_id = $1", [userId]);
+
+    res.status(201).end();
   } catch (error) {
     console.error("Logout error:", error);
     return res.status(500).json({ error: "Internal server error" });

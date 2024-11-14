@@ -52,27 +52,6 @@ export default function Products() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="animate-pulse bg-gray-200 rounded-lg h-64"
-          ></div>
-        ))}
-      </div>
-    );
-  }
-
-  if (!data || data.products.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        <p>No products available</p>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-8 h-full">
       <div className="flex justify-between items-center mb-6">
@@ -85,44 +64,59 @@ export default function Products() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data.products.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
-            onClick={() => {
-              router.push(`/dashboard/products/${product.id}`);
-            }}
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                {product.name}
-              </h2>
-              <p className="text-gray-600 mb-4 line-clamp-2">
-                {product.description}
-              </p>
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-blue-600">
-                  ${product.price}
-                </span>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    product.stock > 0
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {product.stock > 0
-                    ? `${product.stock} in stock`
-                    : "Out of stock"}
-                </span>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="animate-pulse bg-gray-200 rounded-lg h-64"
+            ></div>
+          ))}
+        </div>
+      ) : !data || data.products.length === 0 ? (
+        <div className="flex items-center justify-center h-64 text-gray-500">
+          <p>No products available</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {data.products.map((product) => (
+            <div
+              key={product.id}
+              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+              onClick={() => {
+                router.push(`/dashboard/products/${product.id}`);
+              }}
+            >
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                  {product.name}
+                </h2>
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  {product.description}
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl font-bold text-blue-600">
+                    ${product.price}
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      product.stock > 0
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {product.stock > 0
+                      ? `${product.stock} in stock`
+                      : "Out of stock"}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {data.pagination && (
+      {data?.pagination && (
         <div className="mt-8 flex justify-center gap-2">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}

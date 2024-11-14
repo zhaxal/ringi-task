@@ -41,7 +41,7 @@ export default function Products() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/products?page=${currentPage}`)
+    fetch(`/api/public/products?page=${currentPage}`)
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch products");
         return res.json();

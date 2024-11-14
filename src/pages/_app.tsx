@@ -23,7 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
         body: JSON.stringify({ fcm_token: fcmToken }),
       });
     }
-  }, [fcmToken]);
+  }, [fcmToken, router.pathname]);
 
   useEffect(() => {
     setIsDashboard(router.pathname.startsWith("/dashboard"));

@@ -51,7 +51,7 @@ export default function Order() {
     if (cart.length === 0) return;
 
     const productIds = cart.map((item) => item.id).join(",");
-    fetch(`/api/products?ids=${productIds}`)
+    fetch(`/api/public/products?ids=${productIds}`)
       .then(async (res) => {
         if (!res.ok) throw new Error("Failed to fetch products");
         return res.json();

@@ -50,7 +50,7 @@ export default async function handler(
     );
 
     await pool.query(
-      "INSERT INTO user_roles (user_id, role_id) VALUES ($1, (SELECT id FROM roles WHERE name = 'customer'))",
+      "INSERT INTO user_roles (user_id, role_id) VALUES ($1, (SELECT id FROM roles WHERE name = 'seller'))",
       [newUser.rows[0].id]
     );
 
@@ -60,7 +60,12 @@ export default async function handler(
       token,
     ]);
 
-    res.setHeader("Set-Cookie", `token=${token}; HttpOnly; Path=/`);
+    const isSecure = process.env.NODE_ENV === "production";
+    const cookieOptions = `HttpOnly; Path=/; ${
+      isSecure ? "Secure; SameSite=Strict" : ""
+    }`;
+
+    res.setHeader("Set-Cookie", `token=${token}; ${cookieOptions}`);
 
     return res.status(201).end();
   } catch (error) {
