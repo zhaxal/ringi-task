@@ -12,13 +12,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const userId = req.headers["x-user-id"];
 
     if (!userId) {
-      return res.status(400).json({ error: "Missing user ID" });
+      res.status(400).json({ error: "Missing user ID" });
+      return;
     }
 
     const { fcm_token } = req.body;
 
     if (!fcm_token) {
-      return res.status(400).json({ error: "Missing FCM token" });
+      res.status(400).json({ error: "Missing FCM token" });
+      return;
     }
 
     await pool.query(
@@ -30,10 +32,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       [userId, fcm_token]
     );
 
-    return res.status(201).end();
+    res.status(201).end();
   } catch (error) {
     console.error("Notification error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 }
 
