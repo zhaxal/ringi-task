@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 import useNotificationPermissionStatus from "@/utils/hooks/useNotificationPermission";
 
 export default function Dashboard() {
-  const router = useRouter();
+
   const notificationPermission = useNotificationPermissionStatus();
 
   const logout = async () => {
@@ -11,12 +10,12 @@ export default function Dashboard() {
       await fetch("/api/user/logout", {
         method: "DELETE",
       });
-      router.push("/");
+      
+      window.location.reload();
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
-
   const requestNotifications = async () => {
     try {
       await notificationPermission.requestPermission();
