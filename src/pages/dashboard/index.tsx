@@ -25,6 +25,8 @@ export default function Dashboard() {
     }
   };
 
+  const notificationsSupported = typeof window !== 'undefined' && 'Notification' in window;
+
   return (
     <div className="flex items-center justify-center p-4 h-full">
       <div className="max-w-2xl w-full text-center">
@@ -51,7 +53,7 @@ export default function Dashboard() {
             <p className="text-gray-600">View and manage customer orders</p>
           </Link>
 
-          {notificationPermission.permission !== "granted" && (
+          {notificationsSupported && notificationPermission.permission !== "granted" && (
             <button
               onClick={requestNotifications}
               className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-sm border hover:border-blue-500 transition-colors"

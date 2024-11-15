@@ -128,9 +128,7 @@ export default function Orders() {
           <tbody className="bg-white divide-y divide-gray-200">
             {data.orders.map((order) => (
               <tr
-                onClick={() => {
-                  router.push(`/dashboard/orders/${order.id}`);
-                }}
+                onClick={() => router.push(`/dashboard/orders/${order.id}`)}
                 key={order.id}
                 className="hover:bg-gray-50"
               >
