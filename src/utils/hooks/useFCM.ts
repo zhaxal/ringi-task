@@ -2,22 +2,31 @@ import { useEffect, useState } from "react";
 import useFCMToken from "./useFCMToken";
 import { messaging } from "@/firebase";
 import { MessagePayload, onMessage } from "firebase/messaging";
+import { FCMError } from "./useFCMTypes";
 
 const useFCM = () => {
-  const fcmToken = useFCMToken();
+  const { fcmToken, error: tokenError } = useFCMToken();
   const [messages, setMessages] = useState<MessagePayload[]>([]);
+  const [error, setError] = useState<FCMError | null>(tokenError);
 
   useEffect(() => {
-    const requestNotificationPermission = async () => {
-      if (Notification.permission !== "granted") {
-        await Notification.requestPermission();
+    if (tokenError) {
+      setError(tokenError);
+      return;
+    }
+
+    if (!fcmToken) return;
+
+    try {
+      if (!("serviceWorker" in navigator)) {
+        setError({
+          code: "NO_SERVICE_WORKER",
+          message: "Service Workers are not supported in this browser",
+        });
+        return;
       }
-    };
 
-    if ("serviceWorker" in navigator) {
-      requestNotificationPermission();
       const fcmmessaging = messaging();
-
       const unsubscribe = onMessage(fcmmessaging, (payload) => {
         if (Notification.permission === "granted") {
           new Notification(payload.notification?.title || "New Message", {
@@ -30,10 +39,16 @@ const useFCM = () => {
       });
 
       return () => unsubscribe();
+    } catch (err) {
+      console.error(err);
+      setError({
+        code: "FCM_NOT_SUPPORTED",
+        message: "Failed to initialize FCM message listener",
+      });
     }
-  }, [fcmToken]);
+  }, [fcmToken, tokenError]);
 
-  return { fcmToken, messages };
+  return { fcmToken, messages, error };
 };
 
 export default useFCM;

@@ -1,18 +1,27 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import useNotificationPermissionStatus from "@/utils/hooks/useNotificationPermission";
 
 export default function Dashboard() {
   const router = useRouter();
+  const notificationPermission = useNotificationPermissionStatus();
 
   const logout = async () => {
     try {
       await fetch("/api/user/logout", {
         method: "DELETE",
       });
-
       router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  const requestNotifications = async () => {
+    try {
+      await notificationPermission.requestPermission();
+    } catch (error) {
+      console.error("Notification permission error:", error);
     }
   };
 
@@ -41,6 +50,20 @@ export default function Dashboard() {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Orders</h2>
             <p className="text-gray-600">View and manage customer orders</p>
           </Link>
+
+          {notificationPermission.permission !== "granted" && (
+            <button
+              onClick={requestNotifications}
+              className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-sm border hover:border-blue-500 transition-colors"
+            >
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Enable Notifications
+              </h2>
+              <p className="text-gray-600">
+                Get updates about your orders and products
+              </p>
+            </button>
+          )}
 
           <button
             onClick={logout}
