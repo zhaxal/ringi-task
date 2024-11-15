@@ -38,12 +38,12 @@ export default function Order() {
     if (savedCart) {
       const parsedCart = JSON.parse(savedCart);
       if (parsedCart.length === 0) {
-        router.push("/cart");
+        router.push("/products/cart");
         return;
       }
       setCart(parsedCart);
     } else {
-      router.push("/cart");
+      router.push("/products/cart");
     }
   }, [router]);
 
