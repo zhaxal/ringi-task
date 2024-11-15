@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getToken, isSupported } from "firebase/messaging";
 import { messaging } from "@/firebase";
 import useNotificationPermission from "./useNotificationPermission";
-import { FCMError } from "./useFCMTypes";
+import { FCMError } from "./types";
 
 const useFCMToken = () => {
   const permission = useNotificationPermission();
@@ -44,8 +44,7 @@ const useFCMToken = () => {
 
           try {
             const token = await getToken(messaging(), {
-              vapidKey:
-                "BBxC8a-iNiet5y_2ikGJrdYUcm_8qd_GtMdQJVp3c5c__SHWSbEGARzmN9YW7BEl6YbnNCUPGZFMKuL35AN9zCs",
+              vapidKey: process.env.NEXT_PUBLIC_FIREBASE_FCM_PUBLIC_VAPID_KEY,
             });
             setFcmToken(token);
             setError(null);

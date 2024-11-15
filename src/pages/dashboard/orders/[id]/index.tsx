@@ -27,7 +27,6 @@ export default function Order() {
 
   useEffect(() => {
     if (!router.query.id) return;
-
     setLoading(true);
     fetch(`/api/orders/${router.query.id}`)
       .then(async (res) => {
@@ -52,7 +51,6 @@ export default function Order() {
 
   const handleConfirmOrder = async () => {
     if (!confirm("Are you sure you want to confirm this order?")) return;
-
     setIsConfirming(true);
     setConfirmError(null);
 
@@ -66,11 +64,11 @@ export default function Order() {
         const error = await response.json();
         throw new Error(error.message || "Failed to confirm order");
       }
-
-      // Refresh order data
       router.reload();
     } catch (error) {
-      setConfirmError(error instanceof Error ? error.message : "Failed to confirm order");
+      setConfirmError(
+        error instanceof Error ? error.message : "Failed to confirm order"
+      );
       setIsConfirming(false);
     }
   };
@@ -208,7 +206,9 @@ export default function Order() {
           )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-4 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Customer</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">
+                Customer
+              </h3>
               <p className="text-gray-900 font-medium">{data.customer_name}</p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
@@ -223,7 +223,9 @@ export default function Order() {
         </div>
 
         <div className="p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Order Items</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Order Items
+          </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">

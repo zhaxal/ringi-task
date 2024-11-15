@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import useFCMToken from "./useFCMToken";
 import { messaging } from "@/firebase";
 import { MessagePayload, onMessage } from "firebase/messaging";
-import { FCMError } from "./useFCMTypes";
+import { FCMError } from "./types";
 
 const useFCM = () => {
   const { fcmToken, error: tokenError } = useFCMToken();

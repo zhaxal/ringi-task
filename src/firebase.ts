@@ -4,13 +4,13 @@ import { type FirebaseOptions, initializeApp } from "firebase/app";
 import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig: FirebaseOptions = {
-  apiKey: "AIzaSyD5edfj8USeeX3ikC3tnpme6LYzWL9JQHk",
-  authDomain: "ringi-task.firebaseapp.com",
-  projectId: "ringi-task",
-  storageBucket: "ringi-task.firebasestorage.app",
-  messagingSenderId: "748812161240",
-  appId: "1:748812161240:web:e6a20f5186e40ca67047ad",
-  measurementId: "G-ZDTNZNHSP4",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 const firebaseapp = initializeApp(firebaseConfig);
