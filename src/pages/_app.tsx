@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import useFCM from "@/utils/hooks/useFCM";
+import Head from "next/head";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -31,6 +32,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <div className="flex flex-col h-full">
+      <Head>
+        <title>Task App</title>
+      </Head>
       {isDashboard && <Navbar />}
 
       <div className="flex-grow mx-4 md:mx-8 lg:mx-16">

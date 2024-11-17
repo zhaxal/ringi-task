@@ -130,7 +130,7 @@ export default function Order() {
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
-        <Link href="/cart" className="text-blue-600 hover:text-blue-500">
+        <Link href="/products/cart" className="text-blue-600 hover:text-blue-500">
           Back to Cart
         </Link>
       </div>
